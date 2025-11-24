@@ -242,6 +242,29 @@
             margin-top: 30px;
         }
     }
+
+    .thumbnail-gallery {
+    display: flex;
+    gap: 10px;
+    padding: 15px 0;
+    overflow-x: auto;
+    }
+
+    .thumbnail-item {
+        width: 180px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: border 0.2s, transform 0.2s;
+    }
+
+    .thumbnail-item:hover {
+        border-color: #2563eb;
+        transform: scale(1.05);
+    }
+
 </style>
 @endpush
 
@@ -263,20 +286,54 @@
                 <span class="reviews-count">0 customers reviews</span>
             </div>
 
-            <!-- Preview Section -->
-            <div class="preview-section">
-                @if($application->image)
-                    <img src="{{ asset($application->image) }}" alt="{{ $application->name }}" class="preview-image">
-                @else
-                    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=600&fit=crop" alt="{{ $application->name }}" class="preview-image">
-                @endif
+           <!-- Preview Section -->
 
-                <div class="preview-overlay">
-                    <button class="btn-preview" onclick="window.open('{{ $application->demo_url }}', '_blank')">
-                        Launch Live Preview
-                    </button>
-                </div>
-            </div>
+<div class="preview-section">
+    @if($application->image)
+        <img src="{{ asset($application->image) }}" alt="{{ $application->name }}" class="preview-image">
+    @else
+        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=600&fit=crop"
+            alt="{{ $application->name }}" class="preview-image">
+    @endif
+
+    <div class="preview-overlay">
+        <button class="btn-preview" onclick="window.open('{{ $application->demo_url }}', '_blank')">
+            Launch Live Preview
+        </button>
+    </div>
+</div>
+
+@php
+    $clips = is_array($application->image_clip)
+        ? $application->image_clip
+        : json_decode($application->image_clip, true);
+
+    if (!is_array($clips)) {
+        $clips = [];
+    }
+@endphp
+
+<!-- Thumbnail Gallery -->
+@if(count($clips) > 0)
+    <div class="thumbnail-gallery">
+
+        {{-- Thumbnail clip --}}
+        @foreach($clips as $clip)
+            <img src="{{ asset(ltrim($clip, '/')) }}"
+                 class="thumbnail-item"
+                 onclick="changePreview('{{ asset(ltrim($clip, '/')) }}')">
+        @endforeach
+
+        {{-- Tambah thumbnail gambar utama --}}
+        @if($application->image)
+            <img src="{{ asset(ltrim($application->image, '/')) }}"
+                 class="thumbnail-item"
+                 onclick="changePreview('{{ asset(ltrim($application->image, '/')) }}')">
+        @endif
+
+    </div>
+@endif
+
 
             <!-- Tabs -->
             <div class="tabs-section">
@@ -358,6 +415,10 @@
 
 @push('scripts')
 <script>
+
+    function changePreview(url) {
+    document.querySelector('.preview-image').src = url;
+}
     // Tabs functionality
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', function() {

@@ -42,6 +42,7 @@
                             @enderror
                         </div>
 
+                        <!-- IMAGE MAIN -->
                         <div class="mb-3">
                             <label for="image" class="form-label">Gambar Aplikasi</label>
                             <input type="file" class="form-control @error('image') is-invalid @enderror" 
@@ -57,6 +58,28 @@
                             </div>
                         </div>
 
+                        <!-- MULTIPLE IMAGE CLIP -->
+                        <div class="mb-3">
+                            <label class="form-label">Image Clip (Maksimal 4 Foto)</label>
+                            <input 
+                                type="file" 
+                                class="form-control @error('image_clip') is-invalid @enderror @error('image_clip.*') is-invalid @enderror"
+                                id="image_clip" 
+                                name="image_clip[]" 
+                                accept="image/*" 
+                                multiple
+                            >
+                            @error('image_clip')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            @error('image_clip.*')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                            <div class="row mt-3" id="preview-multiple"></div>
+                        </div>
+
+                        <!-- STATUS -->
                         <div class="mb-3">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="status" name="status" value="1" 
@@ -82,6 +105,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
     const nameInput = document.getElementById('name');
     const slugInput = document.getElementById('slug');
     const imageInput = document.getElementById('image');
@@ -92,13 +116,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const slug = this.value
             .toLowerCase()
             .trim()
-            .replace(/[^\w\s-]/g, '') // hapus karakter khusus
-            .replace(/[\s_-]+/g, '-') // ubah spasi jadi dash
-            .replace(/^-+|-+$/g, ''); // hapus dash awal/akhir
+            .replace(/[^\w\s-]/g, '')
+            .replace(/[\s_-]+/g, '-')
+            .replace(/^-+|-+$/g, '');
         slugInput.value = slug;
     });
 
-    // Preview gambar sebelum upload
+    // Preview gambar utama
     imageInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
@@ -108,6 +132,37 @@ document.addEventListener('DOMContentLoaded', function() {
             previewImage.classList.add('d-none');
         }
     });
+
+    // Preview multiple image clip (max 5)
+    const imageClipInput = document.getElementById('image_clip');
+    const previewMultiple = document.getElementById('preview-multiple');
+
+    imageClipInput.addEventListener('change', function(event) {
+        previewMultiple.innerHTML = "";
+        const files = Array.from(event.target.files);
+
+        if (files.length > 5) {
+            alert("Maksimal unggah 5 foto.");
+            imageClipInput.value = "";
+            return;
+        }
+
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const col = document.createElement('div');
+                col.classList.add('col-3', 'mb-2');
+                col.innerHTML = `
+                    <img src="${e.target.result}" 
+                         class="img-thumbnail" 
+                         width="120">
+                `;
+                previewMultiple.appendChild(col);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
 });
 </script>
 @endsection

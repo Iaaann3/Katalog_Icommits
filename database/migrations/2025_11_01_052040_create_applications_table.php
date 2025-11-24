@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description');
             $table->string('image')->nullable();
+            $table->json('image_clip')->nullable();
             $table->text('demo_url');
             $table->boolean('status')->default(true);
             $table->timestamps();

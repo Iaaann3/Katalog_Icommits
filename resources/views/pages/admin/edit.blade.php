@@ -54,7 +54,7 @@
                             @enderror
                         </div>
 
-                        <!-- GAMBAR -->
+                        <!-- GAMBAR UTAMA -->
                         <div class="mb-3">
                             <label for="image" class="form-label">Gambar Aplikasi</label>
                             @if($application->image)
@@ -68,6 +68,40 @@
                             @error('image')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        <!-- IMAGE CLIP 5 FOTO -->
+                        <div class="mb-3">
+                            <label class="form-label">Image Clip (Max 5 Foto)</label>
+
+                            <!-- Foto lama -->
+                            @if(is_array($application->image_clip))
+                                <div class="row mb-2">
+                                    @foreach($application->image_clip as $img)
+                                        <div class="col-2 text-center">
+                                            <img src="{{ asset($img) }}" class="img-thumbnail mb-1" width="100">
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <div class="form-text mb-2">Foto clip saat ini.</div>
+                            @endif
+
+                            <input 
+                                type="file" 
+                                class="form-control @error('image_clip') is-invalid @enderror @error('image_clip.*') is-invalid @enderror"
+                                id="image_clip" 
+                                name="image_clip[]" 
+                                accept="image/*" 
+                                multiple
+                            >
+                            @error('image_clip')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            @error('image_clip.*')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                            <div class="row mt-3" id="preview-multiple"></div>
                         </div>
 
                         <!-- STATUS -->
@@ -95,30 +129,54 @@
     </div>
 </div>
 
-<!-- AUTO SLUG SCRIPT -->
+<!-- SCRIPT: AUTO SLUG + PREVIEW MULTIPLE -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
     const nameInput = document.getElementById('name');
     const slugInput = document.getElementById('slug');
 
     function generateSlug(text) {
-        return text
-            .toLowerCase()
-            .trim()
+        return text.toLowerCase().trim()
             .replace(/[^\w\s-]/g, '')
             .replace(/[\s_-]+/g, '-')
             .replace(/^-+|-+$/g, '');
     }
 
-    // Otomatis generate slug dari nama (kecuali user ubah manual)
     let manual = false;
     slugInput.addEventListener('input', () => manual = true);
-
     nameInput.addEventListener('input', function() {
         if (!manual) {
             slugInput.value = generateSlug(this.value);
         }
     });
+
+    // Preview Multiple Image Clip
+    const imageClip = document.getElementById('image_clip');
+    const preview = document.getElementById('preview-multiple');
+
+    imageClip.addEventListener('change', function(e) {
+        preview.innerHTML = "";
+        const files = Array.from(e.target.files);
+
+        if (files.length > 5) {
+            alert("Maksimal upload 5 foto.");
+            imageClip.value = "";
+            return;
+        }
+
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const col = document.createElement('div');
+                col.classList.add('col-3', 'mb-2');
+                col.innerHTML = `<img src="${evt.target.result}" class="img-thumbnail" width="120">`;
+                preview.appendChild(col);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
 });
 </script>
 @endsection

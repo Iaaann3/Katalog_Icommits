@@ -19,6 +19,7 @@ class Application extends Model
         'slug',
         'description',
         'image',
+        'image_clip',
         'demo_url',
         'status',
     ];
@@ -30,6 +31,7 @@ class Application extends Model
      */
     protected $casts = [
         'status' => 'boolean',
+        'image_clip' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
